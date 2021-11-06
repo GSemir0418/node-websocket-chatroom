@@ -1,4 +1,5 @@
 const Koa = require('koa')
+// koa没有内置静态资源的中间件，因此使用koa-static
 const koaStatic = require('koa-static')
 const WebSocket = require('ws')
 
@@ -7,8 +8,10 @@ app.use(koaStatic(__dirname + '/public'))
 
 const server = app.listen(8080)
 
+// 将8080端口的server托管给websocket服务器
 const websocketServer = new WebSocket.Server({ server })
 
+// 利用Set集合存储全部客户端
 const clients = new Set()
 
 function broadcast(message) {
@@ -24,6 +27,7 @@ function broadcast(message) {
   }
 }
 websocketServer.on('connection', (ws, request) => {
+  // connection事件触发后，将ws和用户地址端口作为客户端信息存储到clients中
   const address = request.connection.remoteAddress + ':' + request.connection.remotePort
   const client = { ws, address }
   clients.add(client)
